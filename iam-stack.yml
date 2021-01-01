@@ -1,0 +1,148 @@
+---
+Description: Creates a stack containing three IAM roles and four permissions used to grant permissions to various employees(users) in the organization 
+  
+Parameters:
+  AwsAccountId:
+    Type: Number
+    Description: Account number of the AWS account to which to grant access to.
+
+Resources:
+  EditAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS: !Sub arn:aws:iam::${AwsAccountId}:
+          Action:
+          - sts:AssumeRole
+
+  AdminAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS: !Sub arn:aws:iam::${AwsAccountId}:
+          Action:
+          - sts:AssumeRole
+
+  ReadAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS: !Sub arn:aws:iam::${AwsAccountId}:
+          Action:
+          - sts:AssumeRole
+
+  AWSPolicy1:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AmazonEC2ReadOnlyAccess
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - ec2:Describe*
+          - elasticloadbalancing:Describe*
+          - cloudwatch:ListMetrics
+          - cloudwatch:GetMetricStatistics
+          - cloudwatch:Describe*
+          - autoscaling:Describe*
+          Effect: Allow
+          Resource: "*"
+      Roles: [!Ref ReadAccessRole]
+
+AWSPolicy2:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AdministratorAccess
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action: "*"
+          Effect: Allow
+          Resource: "*"
+      Roles: [!Ref AdminAccessRole]
+
+AWSPolicy3:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AmazonEC2ContainerServiceFullAccess
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - autoscaling:Describe*
+          - autoscaling:UpdateAutoScalingGroup
+          - cloudformation:CreateStack
+          - cloudformation:DeleteStack
+          - cloudformation:DescribeStack*
+          - cloudformation:UpdateStack
+          - cloudwatch:GetMetricStatistics
+          - ec2:Describe*
+          - elasticloadbalancing:*
+          - ecs:*
+          - events:DescribeRule
+          - events:DeleteRule
+          - events:ListRuleNamesByTarget
+          - events:ListTargetsByRule
+          - events:PutRule
+          - events:PutTargets
+          - events:RemoveTargets
+          - iam:ListInstanceProfiles
+          - iam:ListRoles
+          - iam:PassRole
+          Effect: Allow
+          Resource: "*"
+      Roles: [!Ref AdminAccessRole]
+
+AWSPolicy4:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AmazonEC2FullAccess
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - ec2:*
+          - elasticloadbalancing:*
+          - cloudwatch:*
+          - autoscaling:*
+          Effect: Allow
+          Resource: "*"
+      Roles: [!Ref EditAccessRole]
+
+Outputs:
+  RoleId1:
+    Description: The logical ID of the IAM role
+    Value: !Ref EditAccessRole
+
+  RoleId2:
+    Description: The logical ID of the IAM role
+    Value: !Ref AdminAccessRole
+
+  RoleId3:
+    Description: The logical ID of the IAM role
+    Value: !Ref ReadAccessRole
+
+  PolicyId1:
+    Description: The logical ID of the IAM policy
+    Value: !Ref AWSPolicy1
+
+  PolicyId2:
+    Description: The logical ID of the IAM policy
+    Value: !Ref AWSPolicy2
+
+  PolicyId3:
+    Description: The logical ID of the IAM policy
+    Value: !Ref AWSPolicy3
+  
+  PolicyId4:
+    Description: The logical ID of the IAM policy
+    Value: !Ref AWSPolicy4
